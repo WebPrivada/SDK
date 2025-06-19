@@ -2,7 +2,7 @@ module github.com/WebPrivada/SDK/db
 
 go 1.24.1
 
-require github.com/IngenieroRicardo/db v0.0.0-20250619151552-32192a4f762b
+require github.com/IngenieroRicardo/db v0.0.0-20250619203449-8f736d851558
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

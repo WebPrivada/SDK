@@ -3,8 +3,8 @@ filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4
 github.com/Azure/azure-sdk-for-go/sdk/azcore v0.19.0/go.mod h1:h6H6c8enJmmocHUbLiiGY6sx7f9i+X3m1CHdd5c6Rdw=
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v0.11.0/go.mod h1:HcM1YX14R7CJcghJGOYCgdezslRSVzqwLf/q+4Y2r/0=
 github.com/Azure/azure-sdk-for-go/sdk/internal v0.7.0/go.mod h1:yqy467j36fJxcRV2TzfVZ1pCb5vxm4BtZPUdYWe/Xo8=
-github.com/IngenieroRicardo/db v0.0.0-20250619151552-32192a4f762b h1:Kg2Ji52j1jr4ZxhVERJRBUc5ndW+sKmrM4Z6IsQ4mFk=
-github.com/IngenieroRicardo/db v0.0.0-20250619151552-32192a4f762b/go.mod h1:aHVbl6v59kM8EhjN3J9bZIeBomNOnl3Lgf+tiUO1gNA=
+github.com/IngenieroRicardo/db v0.0.0-20250619203449-8f736d851558 h1:VXwFeh97pXaKrCa7JVTibcOQCnBufUXQZU58Fv/T3Js=
+github.com/IngenieroRicardo/db v0.0.0-20250619203449-8f736d851558/go.mod h1:aHVbl6v59kM8EhjN3J9bZIeBomNOnl3Lgf+tiUO1gNA=
 github.com/UNO-SOFT/zlog v0.8.1 h1:TEFkGJHtUfTRgMkLZiAjLSHALjwSBdw6/zByMC5GJt4=
 github.com/UNO-SOFT/zlog v0.8.1/go.mod h1:yqFOjn3OhvJ4j7ArJqQNA+9V+u6t9zSAyIZdWdMweWc=
 github.com/VictoriaMetrics/easyproto v0.1.4 h1:r8cNvo8o6sR4QShBXQd1bKw/VVLSQma/V2KhTBPf+Sc=
