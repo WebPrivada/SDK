@@ -3,7 +3,7 @@ module github.com/WebPrivada/SDK/db
 go 1.24.1
 
 require (
-	github.com/IngenieroRicardo/db v0.0.0-20250704041924-199be5523938
+	github.com/IngenieroRicardo/db v0.0.0-20250704144509-00fb405bf81e
 	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/godror/godror v0.49.0
