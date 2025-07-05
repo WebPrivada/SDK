@@ -8,6 +8,14 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
+	"fmt"
+	"github.com/golang-jwt/jwt/v5"
+)
+
+var (
+	credentials = make(map[string]string)
+	secretKey = []byte("https://github.com/IngenieroRicardo/http")
 )
 
 // HttpRequest representa una petición HTTP (similar a la versión C)
@@ -35,6 +43,73 @@ var (
 	handlers      = make(map[string]HttpHandler)
 	handlersMutex sync.RWMutex
 )
+
+func GenerateToken(userid int, expiration int64) string {
+	claims := jwt.MapClaims{
+		"user_id": userid,
+		"exp":     time.Now().Add(time.Second * time.Duration(expiration)).Unix(),
+		"iat":     time.Now().Unix(),
+		"iss":     "http-api",
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		return `{"error":"No se pudo generar el token"}`
+	}
+	response := map[string]interface{}{
+		"access_token": tokenString,
+		"token_type":   "Bearer",
+		"expires_in":   expiration,
+	}
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		return `{"error":"No se pudo generar el JSON"}`
+	}
+	return string(jsonResponse)
+}
+
+func ValidateToken(tokenString string) bool {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("método de firma inválido: %v", token.Header["alg"])
+		}
+		return secretKey, nil
+	})
+	if err != nil || !token.Valid {
+		return false
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if exp, ok := claims["exp"].(float64); ok {
+			return int64(exp) > time.Now().Unix()
+		}
+	}
+	return false
+}
+
+func LoadCredentials(credenciales string) bool {
+	credentials = make(map[string]string) // limpiar previos
+	pairs := strings.Split(credenciales, ",")
+	for _, pair := range pairs {
+		partes := strings.SplitN(pair, ":", 2)
+		if len(partes) != 2 {
+			return false // formato incorrecto
+		}
+		user := strings.TrimSpace(partes[0])
+		pass := strings.TrimSpace(partes[1])
+		if user == "" || pass == "" {
+			return false
+		}
+		credentials[user] = pass
+	}
+	return true
+}
+
+func ValidateCredential(usuario, contraseña string) bool {
+	if storedPass, ok := credentials[usuario]; ok {
+		return storedPass == contraseña
+	}
+	return false
+}
 
 func parseBasicAuth(authHeader string) (string, string, bool) {
 	if !strings.HasPrefix(authHeader, "Basic ") {
