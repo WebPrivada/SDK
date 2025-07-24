@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"reflect"
 )
 
 type JsonResult struct {
@@ -624,4 +625,110 @@ func IsValidJSON(jsonStr string) bool {
 
 	var dummy interface{}
 	return decoder.Decode(&dummy) == nil
+}
+
+
+func ValidateJSON(jsonStr, schemaStr string) JsonResult {
+	var result JsonResult
+
+	// Primero validamos que ambos strings sean JSON válidos
+	if !IsValidJSON(jsonStr) {
+		result.Is_Valid = false
+		result.Error = errors.New("JSON de entrada no es válido")
+		return result
+	}
+
+	if !IsValidJSON(schemaStr) {
+		result.Is_Valid = false
+		result.Error = errors.New("JSON de esquema no es válido")
+		return result
+	}
+
+	// Parseamos ambos JSON
+	var data, schema interface{}
+	if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
+		result.Is_Valid = false
+		result.Error = fmt.Errorf("error al parsear JSON de entrada: %w", err)
+		return result
+	}
+
+	if err := json.Unmarshal([]byte(schemaStr), &schema); err != nil {
+		result.Is_Valid = false
+		result.Error = fmt.Errorf("error al parsear JSON de esquema: %w", err)
+		return result
+	}
+
+	// Validamos la estructura
+	if err := validateStructure(data, schema); err != nil {
+		result.Is_Valid = false
+		result.Error = fmt.Errorf("validación fallida: %w", err)
+		return result
+	}
+
+	result.Is_Valid = true
+	result.Value = "JSON válido según el esquema"
+	return result
+}
+
+// validateStructure compara recursivamente los datos con el esquema
+func validateStructure(data, schema interface{}) error {
+	switch schemaTyped := schema.(type) {
+	case map[string]interface{}:
+		// El esquema es un objeto, los datos también deben serlo
+		dataTyped, ok := data.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("se esperaba un objeto")
+		}
+
+		// Verificar que todas las claves del esquema existan en los datos
+		for key := range schemaTyped {
+			if _, exists := dataTyped[key]; !exists {
+				return fmt.Errorf("falta la clave '%s'", key)
+			}
+		}
+
+		// Verificar que no haya claves adicionales en los datos
+		for key := range dataTyped {
+			if _, exists := schemaTyped[key]; !exists {
+				return fmt.Errorf("clave adicional '%s' no permitida", key)
+			}
+		}
+
+		// Validar recursivamente cada valor
+		for key, schemaValue := range schemaTyped {
+			if err := validateStructure(dataTyped[key], schemaValue); err != nil {
+				return fmt.Errorf("en clave '%s': %w", key, err)
+			}
+		}
+
+	case []interface{}:
+		// El esquema es un array, los datos también deben serlo
+		dataTyped, ok := data.([]interface{})
+		if !ok {
+			return fmt.Errorf("se esperaba un array")
+		}
+
+		// Si el esquema del array está vacío, no validamos los tipos de los elementos
+		if len(schemaTyped) == 0 {
+			return nil
+		}
+
+		// Validar que todos los elementos del array coincidan con el primer elemento del esquema
+		// (asumimos que el esquema define el tipo esperado para todos los elementos)
+		for i, item := range dataTyped {
+			if err := validateStructure(item, schemaTyped[0]); err != nil {
+				return fmt.Errorf("en índice %d del array: %w", i, err)
+			}
+		}
+
+	default:
+		// Para valores primitivos, solo verificamos que los tipos coincidan
+		dataType := reflect.TypeOf(data)
+		schemaType := reflect.TypeOf(schema)
+		if dataType != schemaType {
+			return fmt.Errorf("tipo incorrecto, se esperaba %s pero se obtuvo %s", schemaType, dataType)
+		}
+	}
+
+	return nil
 }
