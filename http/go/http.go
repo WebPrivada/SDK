@@ -188,6 +188,44 @@ func StartServer(port string, enableFilter int, certFile string, keyFile string)
 			return
 		}
 
+
+		
+		w.Header().Set("Content-Security-Policy", 
+			"default-src 'self'; "+
+			"script-src 'self'; "+
+			"style-src 'self' 'unsafe-inline'; "+
+			"img-src 'self' data: https:; "+
+			"font-src 'self'; "+
+			"connect-src 'self'; "+
+			"object-src 'none'; "+
+			"frame-ancestors 'none';")
+		
+		// Prevenir MIME type sniffing
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		
+		// Controlar información del referente
+		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		
+		// Limitar APIs del navegador
+		w.Header().Set("Permissions-Policy", 
+			"camera=(), "+
+			"microphone=(), "+
+			"geolocation=(), "+
+			"payment=()")
+		
+		// Prevenir clickjacking
+		w.Header().Set("X-Frame-Options", "DENY")
+		
+		// Protección XSS para navegadores antiguos
+		w.Header().Set("X-XSS-Protection", "1; mode=block")
+		
+		// HSTS - Solo aplicar si es HTTPS
+		if r.TLS != nil || strings.ToLower(r.Header.Get("X-Forwarded-Proto")) == "https" {
+			w.Header().Set("Strict-Transport-Security", 
+				"max-age=31536000; includeSubDomains; preload")
+		}
+
+		
 		// Configurar content-type por defecto
 		w.Header().Set("Content-Type", "application/json")
 
