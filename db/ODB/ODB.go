@@ -8,7 +8,7 @@ import (
 	"strings"
 	"bytes"
 	_ "github.com/godror/godror"
-	STRC "github.com/IngenieroRicardo/db/STRUCTURES"
+	STRC "github.com/WebPrivada/SDK/db/STRUCTURES"
 	"regexp"
 	"errors"
 )
